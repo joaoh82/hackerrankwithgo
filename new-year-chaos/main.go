@@ -4,33 +4,36 @@ import (
 	"bufio"
 	"fmt"
 	"io"
-	"math"
 	"os"
 	"strconv"
 	"strings"
 )
 
 // Complete the minimumBribes function below.
-func minimumBribes(q []int32) {
+func minimumBribes(q []int) {
 	bribe := 0
+	chaotic := false
 	n := len(q)
-	for i := 1; i < n; i++ {
-		diff := int(q[i]) - (i + 1)
-		if diff < 0 {
-			diff = int(math.Abs(float64(diff)))
+	for i := 0; i < n; i++ {
+		if q[i]-(i+1) > 2 {
+			chaotic = true
+			break
 		}
-		fmt.Println(diff)
-		if diff > 2 {
-			fmt.Println("Too chaotic")
-			return
+		max := q[i] - 1 - 1
+		if max <= 0 {
+			max = 0
 		}
-		for j := int(math.Max(0, float64(q[i])-1-1)); j < i; j++ {
+		for j := max; j < i; j++ {
 			if q[j] > q[i] {
 				bribe++
 			}
 		}
 	}
-	fmt.Println("bribe:", bribe)
+	if chaotic {
+		fmt.Println("Too chaotic")
+	} else {
+		fmt.Println(bribe)
+	}
 }
 
 func main() {
@@ -38,21 +41,21 @@ func main() {
 
 	tTemp, err := strconv.ParseInt(readLine(reader), 10, 64)
 	checkError(err)
-	t := int32(tTemp)
+	t := int(tTemp)
 
 	for tItr := 0; tItr < int(t); tItr++ {
 		nTemp, err := strconv.ParseInt(readLine(reader), 10, 64)
 		checkError(err)
-		n := int32(nTemp)
+		n := int(nTemp)
 
 		qTemp := strings.Split(readLine(reader), " ")
 
-		var q []int32
+		var q []int
 
 		for i := 0; i < int(n); i++ {
 			qItemTemp, err := strconv.ParseInt(qTemp[i], 10, 64)
 			checkError(err)
-			qItem := int32(qItemTemp)
+			qItem := int(qItemTemp)
 			q = append(q, qItem)
 		}
 
