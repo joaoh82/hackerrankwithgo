@@ -15,7 +15,12 @@ func minimumBribes(q []int32) {
 	bribe := 0
 	n := len(q)
 	for i := 1; i < n; i++ {
-		if int(q[i])-(i+1) > 2 {
+		diff := int(q[i]) - (i + 1)
+		if diff < 0 {
+			diff = int(math.Abs(float64(diff)))
+		}
+		fmt.Println(diff)
+		if diff > 2 {
 			fmt.Println("Too chaotic")
 			return
 		}
@@ -25,7 +30,7 @@ func minimumBribes(q []int32) {
 			}
 		}
 	}
-	fmt.Println(bribe)
+	fmt.Println("bribe:", bribe)
 }
 
 func main() {
