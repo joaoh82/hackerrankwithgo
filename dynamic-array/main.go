@@ -1,108 +1,99 @@
 package main
 
 import (
-	"bufio"
 	"fmt"
-	"io"
-	"os"
-	"strconv"
-	"strings"
+	"log"
 )
 
-// Complete the dynamicArray function below.
-func dynamicArray(n int32, queries [][]int32) []int32 {
-	var lastAnswer int32
-	var sequenceOne []int32
-	var sequenceTwo []int32
+const Q1 = 1
+const Q2 = 2
 
-	var useSequence = [][]int32{sequenceOne, sequenceTwo}
+type Query struct {
+	Type int
+	X    int
+	Y    int
+}
 
-	var returnSeq []int32
+type Sequence []int
 
-	for _, query := range queries {
-		queryType := query[0]
-		x := query[1]
-		y := query[2]
-		sequenceNum := (x ^ lastAnswer) % n
-
-		if queryType == 1 {
-			useSequence[sequenceNum] = append(useSequence[sequenceNum], y)
-		}
-
-		if queryType == 2 {
-			elementIndex := y % int32(len(useSequence[sequenceNum]))
-			lastAnswer = useSequence[sequenceNum][elementIndex]
-			returnSeq = append(returnSeq, lastAnswer)
-		}
-	}
-	return returnSeq
+type List struct {
+	Last      int
+	Sequences []Sequence
+	Queries   []Query
 }
 
 func main() {
-	reader := bufio.NewReaderSize(os.Stdin, 16*1024*1024)
-
-	stdout, err := os.Create(os.Getenv("OUTPUT_PATH"))
-	checkError(err)
-
-	defer stdout.Close()
-
-	writer := bufio.NewWriterSize(stdout, 16*1024*1024)
-
-	nq := strings.Split(strings.TrimSpace(readLine(reader)), " ")
-
-	nTemp, err := strconv.ParseInt(nq[0], 10, 64)
-	checkError(err)
-	n := int32(nTemp)
-
-	qTemp, err := strconv.ParseInt(nq[1], 10, 64)
-	checkError(err)
-	q := int32(qTemp)
-
-	var queries [][]int32
-	for i := 0; i < int(q); i++ {
-		queriesRowTemp := strings.Split(strings.TrimRight(readLine(reader), " \t\r\n"), " ")
-
-		var queriesRow []int32
-		for _, queriesRowItem := range queriesRowTemp {
-			queriesItemTemp, err := strconv.ParseInt(queriesRowItem, 10, 64)
-			checkError(err)
-			queriesItem := int32(queriesItemTemp)
-			queriesRow = append(queriesRow, queriesItem)
-		}
-
-		if len(queriesRow) != 3 {
-			panic("Bad input")
-		}
-
-		queries = append(queries, queriesRow)
-	}
-
-	result := dynamicArray(n, queries)
-
-	for i, resultItem := range result {
-		fmt.Fprintf(writer, "%d", resultItem)
-
-		if i != len(result)-1 {
-			fmt.Fprintf(writer, "\n")
-		}
-	}
-
-	fmt.Fprintf(writer, "\n")
-
-	writer.Flush()
-}
-
-func readLine(reader *bufio.Reader) string {
-	str, _, err := reader.ReadLine()
-	if err == io.EOF {
-		return ""
-	}
-
-	return strings.TrimRight(string(str), "\r\n")
-}
-
-func checkError(err error) {
+	list, err := ReadList()
 	if err != nil {
-		panic(err)
+		log.Fatal(err)
 	}
+
+	list.Run()
+}
+
+func ReadList() (*List, error) {
+	var sequenceCount, queryCount int
+
+	_, err := fmt.Scanf("%d %d", &sequenceCount, &queryCount)
+	if err != nil {
+		return nil, err
+	}
+
+	list := new(List)
+
+	list.Last = 0
+
+	list.Sequences = make([]Sequence, sequenceCount)
+	for i := range list.Sequences {
+		list.Sequences[i] = make([]int, 0)
+	}
+
+	list.Queries = make([]Query, queryCount)
+
+	for i := 0; i < queryCount; i++ {
+		q := Query{}
+		_, err := fmt.Scanf("%d %d %d", &q.Type, &q.X, &q.Y)
+		if err != nil {
+			return nil, err
+		}
+		list.Queries[i] = q
+	}
+
+	return list, nil
+}
+
+func (list *List) Print() {
+	fmt.Printf("Queries\n-------\n")
+
+	for _, q := range list.Queries {
+		fmt.Printf("Type: %d / X: %d / Y: %d\n", q.Type, q.X, q.Y)
+	}
+
+	fmt.Printf("Sequences\n---------\n")
+
+	for _, s := range list.Sequences {
+		fmt.Printf("%v\n", s)
+	}
+}
+
+func (list *List) Run() {
+	for _, q := range list.Queries {
+		switch q.Type {
+		case Q1:
+			list.Query1(q.X, q.Y)
+		case Q2:
+			list.Query2(q.X, q.Y)
+		}
+	}
+}
+
+func (list *List) Query1(x, y int) {
+	index := (x ^ list.Last) % len(list.Sequences)
+	list.Sequences[index] = append(list.Sequences[index], y)
+}
+
+func (list *List) Query2(x, y int) {
+	index := (x ^ list.Last) % len(list.Sequences)
+	list.Last = list.Sequences[index][y%len(list.Sequences[index])]
+	fmt.Printf("%d\n", list.Last)
 }
