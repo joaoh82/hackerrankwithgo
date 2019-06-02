@@ -9,6 +9,10 @@ import (
 	"strings"
 )
 
+// We loop over the rows in the query, and then sub-loop over the elements of
+// the array than need summation. This approach worksfine , but it will not pass
+// (in an acceptable amount of time) the higher tests in when n is very
+// large - O(n**2)
 func arrayManipulation_too_slow_solution(n int32, queries [][]int32) int64 {
 	var maxValue int64
 	arr := make([]int32, n)
@@ -28,7 +32,7 @@ func arrayManipulation_too_slow_solution(n int32, queries [][]int32) int64 {
 	return maxValue
 }
 
-// This is better
+// This is better - O(N*M)
 func arrayManipulation(n int32, queries [][]int32) int64 {
 	var maxValue int64
 	var itt int64
